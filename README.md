@@ -11,6 +11,8 @@ Additional tools for working with the filesystem are also included:
 - `find` which offers much of the functionality of the shell find utility
 - `shelljob.fs.NamedTempFile` provides a _with_ block wrapper for temporary named files
 
+[API Documentation](https://mortoray.github.io/shelljob/)
+
 
 # Install
 
@@ -74,6 +76,6 @@ files = fs.find( '/usr/local', name_regex = '.*\\.so' )
 print( "\n".join(files) )
 ````
 
-Refer to the [API docs](http://pythonhosted.org/shelljob/) for all parameters. Just let me know if there is some additional option you need.
+Refer to the [API docs](https://mortoray.github.io/shelljob/) for all parameters. Just let me know if there is some additional option you need.
 
 
