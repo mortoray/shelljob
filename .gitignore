@@ -1,0 +1,8 @@
+env/
+**/__pycache__/
+src/shelljob/doc
+
+.mypy_cache
+
+
+src/shelljob/doc/_*
