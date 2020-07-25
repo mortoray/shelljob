@@ -1,4 +1,4 @@
-Metadata-Version: 1.1
+Metadata-Version: 2.1
 Name: shelljob
 Version: 0.6
 Summary: Run multiple subprocesses asynchronous/in parallel with streamed output/non-blocking reading. Also various tools to replace shell scripts.
@@ -18,6 +18,8 @@ Description: # shelljob
         
         - `find` which offers much of the functionality of the shell find utility
         - `shelljob.fs.NamedTempFile` provides a _with_ block wrapper for temporary named files
+        
+        [API Documentation](https://mortoray.github.io/shelljob/)
         
         
         # Install
@@ -82,12 +84,9 @@ Description: # shelljob
         print( "\n".join(files) )
         ````
         
-        Refer to the [API docs](http://pythonhosted.org/shelljob/) for all parameters. Just let me know if there is some additional option you need.
+        Refer to the [API docs](https://mortoray.github.io/shelljob/) for all parameters. Just let me know if there is some additional option you need.
         
         
-        # Issues
-        
-        You can use my [Launchpad project](https://bugs.launchpad.net/mortoray.com) to submit issues.
         
 Platform: UNKNOWN
 Classifier: Development Status :: 6 - Mature
@@ -100,3 +99,5 @@ Classifier: Operating System :: OS Independent
 Classifier: Topic :: Terminals
 Classifier: Topic :: System
 Classifier: Topic :: Software Development :: Build Tools
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown

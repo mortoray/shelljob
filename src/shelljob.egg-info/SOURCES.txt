@@ -14,9 +14,6 @@ src/shelljob/__pycache__/__init__.cpython-36.pyc
 src/shelljob/__pycache__/fs.cpython-36.pyc
 src/shelljob/__pycache__/job.cpython-36.pyc
 src/shelljob/__pycache__/proc.cpython-36.pyc
-src/shelljob/doc/conf.py
-src/shelljob/doc/index.rst
-src/shelljob/doc/shelljob.rst
 test/test_find.py
 test/test_group.py
 test/test_group_stream.py

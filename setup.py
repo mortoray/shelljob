@@ -35,8 +35,10 @@ setup(
 		'Topic :: Software Development :: Build Tools',
 		],
 	long_description = open('README.md','r',encoding="utf-8").read(),
+	long_description_content_type="text/markdown",
 	package_data = { 
 		'shelljob': [ base_dir + '/doc/*' ] 
 	},
 	license = 'GPLv3',
+	python_requires=">=3.6",
 )
