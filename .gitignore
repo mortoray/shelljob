@@ -5,5 +5,4 @@ src/shelljob/doc
 .mypy_cache
 MANIFEST
 
-doc/dist/
 

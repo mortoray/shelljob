@@ -1,0 +1,354 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>shelljob.job &#8212; shelljob 0.5.5 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for shelljob.job</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	A basic monitor that provides a more convenient use of the process Groups.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">from</span> <span class="nn">shelljob</span> <span class="kn">import</span> <span class="n">proc</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Manages a Group by collecting output and displaying feedback. This is an abstract</span>
+<span class="sd">	class which provides the basic mechanism.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Monitor"><a class="viewcode-back" href="../../shelljob.html#shelljob.job.Monitor">[docs]</a><span class="k">class</span> <span class="nc">Monitor</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">max_simul</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">(),</span> <span class="n">feedback_timeout</span> <span class="o">=</span> <span class="mf">5.0</span> <span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			@param max_simul: the maximum number of processes which can be running</span>
+<span class="sd">				at the same time</span>
+<span class="sd">			@param feedback_timeout: generate progress feedback at this interval</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">group</span> <span class="o">=</span> <span class="n">proc</span><span class="o">.</span><span class="n">Group</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">max_simul</span> <span class="o">=</span> <span class="n">max_simul</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">jobs</span> <span class="o">=</span> <span class="p">{}</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">feedback_timeout</span> <span class="o">=</span> <span class="n">feedback_timeout</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">last_feedback</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">job_count</span> <span class="o">=</span> <span class="mi">0</span>
+		
+<div class="viewcode-block" id="Monitor.convert_cmds"><a class="viewcode-back" href="../../shelljob.html#shelljob.job.Monitor.convert_cmds">[docs]</a>	<span class="k">def</span> <span class="nf">convert_cmds</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">in_cmds</span> <span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			Converts a variable format input command list to a set of Jobs.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">out_cmds</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="k">for</span> <span class="n">cmd</span> <span class="ow">in</span> <span class="n">in_cmds</span><span class="p">:</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span><span class="n">Job</span><span class="p">):</span>
+				<span class="n">cmd</span> <span class="o">=</span> <span class="n">Job</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+				
+			<span class="k">if</span> <span class="n">cmd</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+				<span class="n">cmd</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">job_count</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">job_count</span> <span class="o">+=</span> <span class="mi">1</span>
+				
+			<span class="n">out_cmds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">cmd</span> <span class="p">)</span>
+		<span class="k">return</span> <span class="n">out_cmds</span></div>
+		
+<div class="viewcode-block" id="Monitor.run"><a class="viewcode-back" href="../../shelljob.html#shelljob.job.Monitor.run">[docs]</a>	<span class="k">def</span> <span class="nf">run</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">cmds</span><span class="p">,</span> <span class="n">shell</span> <span class="o">=</span> <span class="kc">False</span> <span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			Run a series of commands and wait for their completion.</span>
+<span class="sd">			</span>
+<span class="sd">			@param cmds: a list of cmds or Job&#39;s for Group.run. This will be run in parallel obeying the</span>
+<span class="sd">				&#39;max_simul&#39; option provided to the constructor. Using Job&#39;s directly allows you to associate</span>
+<span class="sd">				additional data for use with each job -- helpful for custom monitors.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">cmds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_cmds</span><span class="p">(</span> <span class="n">cmds</span> <span class="p">)</span>
+		
+		<span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+			<span class="c1"># ensure max_simul are running</span>
+			<span class="n">run_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_finished</span><span class="p">()</span>
+			<span class="k">if</span> <span class="n">run_count</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_simul</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">cmds</span><span class="p">):</span>
+				<span class="c1"># space to create a new job</span>
+				<span class="n">job</span> <span class="o">=</span> <span class="n">cmds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+				<span class="n">job</span><span class="o">.</span><span class="n">handle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">run</span><span class="p">(</span> <span class="n">job</span><span class="o">.</span><span class="n">cmd</span><span class="p">,</span> <span class="n">shell</span> <span class="o">=</span> <span class="n">shell</span> <span class="p">)</span>
+				<span class="n">job</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">Job</span><span class="o">.</span><span class="n">STATUS_RUNNING</span>
+				<span class="n">cmds</span> <span class="o">=</span> <span class="n">cmds</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+				
+				<span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="p">[</span><span class="n">job</span><span class="o">.</span><span class="n">handle</span><span class="p">]</span> <span class="o">=</span> <span class="n">job</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">job_started</span><span class="p">(</span><span class="n">job</span><span class="p">)</span>
+				<span class="c1"># this allows a quick spawing of max_simul on first call</span>
+				<span class="k">continue</span>
+			
+			<span class="n">lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+			<span class="k">for</span> <span class="n">handle</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">job_output</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="p">[</span><span class="n">handle</span><span class="p">],</span> <span class="n">line</span> <span class="p">)</span>
+				
+			<span class="bp">self</span><span class="o">.</span><span class="n">_check_feedback</span><span class="p">()</span>
+				
+			<span class="k">if</span> <span class="n">run_count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+				<span class="k">break</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">gen_feedback</span><span class="p">()</span></div>
+				
+	<span class="k">def</span> <span class="nf">_check_finished</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			Process all finished items.</span>
+<span class="sd">			</span>
+<span class="sd">			@return: count of still running jobs</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">codes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">get_exit_codes</span><span class="p">()</span>
+		<span class="n">count_run</span> <span class="o">=</span> <span class="mi">0</span>
+		<span class="n">count_done</span> <span class="o">=</span> <span class="mi">0</span>
+		<span class="k">for</span> <span class="n">handle</span><span class="p">,</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">codes</span><span class="p">:</span>
+			<span class="c1"># it must be done and no output left before we consider it done</span>
+			<span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">handle</span><span class="o">.</span><span class="n">group_output_done</span><span class="p">:</span>
+				<span class="n">count_run</span> <span class="o">+=</span> <span class="mi">1</span>
+				<span class="k">continue</span>
+				
+			<span class="n">job</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="p">[</span><span class="n">handle</span><span class="p">]</span>
+			<span class="n">job</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">Job</span><span class="o">.</span><span class="n">STATUS_FINISHED</span>
+			<span class="n">job</span><span class="o">.</span><span class="n">exit_code</span> <span class="o">=</span> <span class="n">code</span>
+			<span class="n">count_done</span> <span class="o">+=</span> <span class="mi">1</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">job_finished</span><span class="p">(</span> <span class="n">job</span> <span class="p">)</span>
+
+		<span class="k">if</span> <span class="n">count_done</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">clear_finished</span><span class="p">()</span>
+			
+		<span class="k">return</span> <span class="n">count_run</span>
+		
+	<span class="k">def</span> <span class="nf">_check_feedback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			Call gen_feedback at regular interval.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">elapsed</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_feedback</span>
+		<span class="k">if</span> <span class="n">elapsed</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">feedback_timeout</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">gen_feedback</span><span class="p">()</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">last_feedback</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+		
+<div class="viewcode-block" id="Monitor.job_finished"><a class="viewcode-back" href="../../shelljob.html#shelljob.job.Monitor.job_finished">[docs]</a>	<span class="k">def</span> <span class="nf">job_finished</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			(Virtual) Called when a job has completed.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">pass</span></div>
+		
+<div class="viewcode-block" id="Monitor.job_started"><a class="viewcode-back" href="../../shelljob.html#shelljob.job.Monitor.job_started">[docs]</a>	<span class="k">def</span> <span class="nf">job_started</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			(Virtual) Called just after a job is started.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">pass</span></div>
+		
+<div class="viewcode-block" id="Monitor.job_output"><a class="viewcode-back" href="../../shelljob.html#shelljob.job.Monitor.job_output">[docs]</a>	<span class="k">def</span> <span class="nf">job_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			(Virtual) Called for each line of output from a job.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">pass</span></div>
+		
+<div class="viewcode-block" id="Monitor.gen_feedback"><a class="viewcode-back" href="../../shelljob.html#shelljob.job.Monitor.gen_feedback">[docs]</a>	<span class="k">def</span> <span class="nf">gen_feedback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			(Virtual) Called whenever the Monitor things feedback should be generated (in addition to the other</span>
+<span class="sd">			events). Generally this is called for each feedback_timeout period specified in the constructor.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Monitor.get_jobs"><a class="viewcode-back" href="../../shelljob.html#shelljob.job.Monitor.get_jobs">[docs]</a>	<span class="k">def</span> <span class="nf">get_jobs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			Get the list of jobs.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">values</span><span class="p">()</span></div></div>
+		
+<div class="viewcode-block" id="Job"><a class="viewcode-back" href="../../shelljob.html#shelljob.job.Job">[docs]</a><span class="k">class</span> <span class="nc">Job</span><span class="p">:</span>
+	<span class="n">STATUS_NONE</span> <span class="o">=</span> <span class="mi">0</span>
+	<span class="n">STATUS_RUNNING</span> <span class="o">=</span> <span class="mi">1</span>
+	<span class="n">STATUS_FINISHED</span> <span class="o">=</span> <span class="mi">2</span>
+	
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Encapsulates information about a job.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">):</span>
+		<span class="c1"># the Popen object, set by monitor when the job starts</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">handle</span> <span class="o">=</span> <span class="kc">None</span>
+		<span class="c1"># An identifier, if set to None then monitor will assign one (incrementing)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+		<span class="c1"># command executed by the job</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">cmd</span> <span class="o">=</span> <span class="n">cmd</span>
+		<span class="c1"># Current status of the job</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">Job</span><span class="o">.</span><span class="n">STATUS_NONE</span>
+		<span class="c1"># Value of the exit code from the process, or None if not yet finished</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">exit_code</span> <span class="o">=</span> <span class="kc">None</span>
+		<span class="c1"># An identifying name</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
+		
+<div class="viewcode-block" id="Job.get_ref_name"><a class="viewcode-back" href="../../shelljob.html#shelljob.job.Job.get_ref_name">[docs]</a>	<span class="k">def</span> <span class="nf">get_ref_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			A reference name suitable for using in identifiers and files.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+			<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span>
+		
+		<span class="c1"># generate simple safe filename</span>
+		<span class="n">base</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span> <span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span> <span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span> <span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span> <span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span> <span class="p">)</span>
+		<span class="n">keep</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+		<span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">base</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">isalnum</span><span class="p">()</span> <span class="ow">or</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">keep</span> <span class="p">)</span></div></div>
+
+		
+<div class="viewcode-block" id="FileMonitor"><a class="viewcode-back" href="../../shelljob.html#shelljob.job.FileMonitor">[docs]</a><span class="k">class</span> <span class="nc">FileMonitor</span><span class="p">(</span><span class="n">Monitor</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		A monitor which writes output to log files. Simple textual feedback will also be reported</span>
+<span class="sd">		to the console.</span>
+<span class="sd">		</span>
+<span class="sd">		@param file_pattern: will be formatted with the job.id to produce filenames. These files</span>
+<span class="sd">			are overwritten when a job starts and record the output of the job.</span>
+<span class="sd">		@param meta: if True then meta information about the job will also be recorded to the</span>
+<span class="sd">			logfile</span>
+<span class="sd">		@param kwargs: the remaining arguments are passed to the Monitor constructor</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_pattern</span> <span class="o">=</span> <span class="s1">&#39;/tmp/job_</span><span class="si">{}</span><span class="s1">.log&#39;</span><span class="p">,</span> <span class="n">meta</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+		<span class="nb">super</span><span class="p">(</span><span class="n">FileMonitor</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span> <span class="o">**</span><span class="n">kwargs</span> <span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">file_pattern</span> <span class="o">=</span> <span class="n">file_pattern</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="n">meta</span>
+		
+<div class="viewcode-block" id="FileMonitor.get_log_name"><a class="viewcode-back" href="../../shelljob.html#shelljob.job.FileMonitor.get_log_name">[docs]</a>	<span class="k">def</span> <span class="nf">get_log_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">job</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			(Virtual) get the log of the log file to use.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_pattern</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="n">job</span><span class="o">.</span><span class="n">get_ref_name</span><span class="p">()</span> <span class="p">)</span></div>
+		
+<div class="viewcode-block" id="FileMonitor.job_finished"><a class="viewcode-back" href="../../shelljob.html#shelljob.job.FileMonitor.job_finished">[docs]</a>	<span class="k">def</span> <span class="nf">job_finished</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			Called when a job has completed.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="p">:</span>
+			<span class="n">job</span><span class="o">.</span><span class="n">log_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="s2">&quot;Exit Code: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="n">job</span><span class="o">.</span><span class="n">exit_code</span> <span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span> <span class="p">)</span>
+			
+		<span class="n">job</span><span class="o">.</span><span class="n">log_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+		
+<div class="viewcode-block" id="FileMonitor.job_started"><a class="viewcode-back" href="../../shelljob.html#shelljob.job.FileMonitor.job_started">[docs]</a>	<span class="k">def</span> <span class="nf">job_started</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			Called just after a job is started.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">job</span><span class="o">.</span><span class="n">log_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_log_name</span><span class="p">(</span><span class="n">job</span><span class="p">)</span>
+		<span class="n">job</span><span class="o">.</span><span class="n">log_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">log_name</span><span class="p">,</span><span class="s1">&#39;wb&#39;</span><span class="p">)</span>
+		<span class="n">job</span><span class="o">.</span><span class="n">got_output</span> <span class="o">=</span> <span class="kc">False</span>
+		
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="p">:</span>
+			<span class="n">job</span><span class="o">.</span><span class="n">log_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="s2">&quot;Job #</span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">job</span><span class="o">.</span><span class="n">cmd</span> <span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span> <span class="p">)</span></div>
+		
+<div class="viewcode-block" id="FileMonitor.job_output"><a class="viewcode-back" href="../../shelljob.html#shelljob.job.FileMonitor.job_output">[docs]</a>	<span class="k">def</span> <span class="nf">job_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			Called for each line of output from a job.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">job</span><span class="o">.</span><span class="n">log_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+		<span class="n">job</span><span class="o">.</span><span class="n">got_output</span> <span class="o">=</span> <span class="kc">True</span></div>
+		
+<div class="viewcode-block" id="FileMonitor.gen_feedback"><a class="viewcode-back" href="../../shelljob.html#shelljob.job.FileMonitor.gen_feedback">[docs]</a>	<span class="k">def</span> <span class="nf">gen_feedback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			Called whenever the Monitor things feedback should be generated (in addition to the other</span>
+<span class="sd">			events). Generally this is called for each feedback_timeout period specified in the constructor.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">good</span> <span class="o">=</span> <span class="mi">0</span>
+		<span class="n">bad</span> <span class="o">=</span> <span class="mi">0</span>
+		<span class="n">output</span> <span class="o">=</span> <span class="mi">0</span>
+		<span class="n">stall</span> <span class="o">=</span> <span class="mi">0</span>
+		<span class="k">for</span> <span class="n">job</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_jobs</span><span class="p">():</span>
+			<span class="k">if</span> <span class="n">job</span><span class="o">.</span><span class="n">exit_code</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+				<span class="k">if</span> <span class="n">job</span><span class="o">.</span><span class="n">exit_code</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+					<span class="n">good</span> <span class="o">+=</span> <span class="mi">1</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="n">bad</span> <span class="o">+=</span> <span class="mi">1</span>
+			<span class="k">elif</span> <span class="n">job</span><span class="o">.</span><span class="n">got_output</span><span class="p">:</span>
+				<span class="n">job</span><span class="o">.</span><span class="n">got_output</span> <span class="o">=</span> <span class="kc">False</span>
+				<span class="n">output</span> <span class="o">+=</span> <span class="mi">1</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">stall</span> <span class="o">+=</span> <span class="mi">1</span>
+	
+		<span class="nb">print</span><span class="p">(</span> <span class="s2">&quot;Done: </span><span class="si">{}</span><span class="s2">  Failed: </span><span class="si">{}</span><span class="s2">  Reading: </span><span class="si">{}</span><span class="s2">  Idle: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="n">good</span><span class="p">,</span> <span class="n">bad</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">stall</span> <span class="p">)</span> <span class="p">)</span></div></div>
+		
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">shelljob</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../shelljob.html">shelljob package</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, edA-qa mort-ora-y.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,221 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>shelljob.fs &#8212; shelljob 0.5.5 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for shelljob.fs</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	A collection of filesystem related commands.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">tempfile</span>
+
+<div class="viewcode-block" id="find"><a class="viewcode-back" href="../../shelljob.html#shelljob.fs.find">[docs]</a><span class="k">def</span> <span class="nf">find</span><span class="p">(</span> <span class="n">path</span><span class="p">,</span> 
+	<span class="n">include_dirs</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">include_files</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+	<span class="n">name_regex</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">not_name_regex</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+	<span class="n">whole_name_regex</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">not_whole_name_regex</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+	<span class="n">exclude_root</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">relative</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+	<span class="n">limit_depth</span> <span class="o">=</span> <span class="kc">None</span> <span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Creates an iterator of files matching a variety of conditions.</span>
+<span class="sd">		</span>
+<span class="sd">		@param path: which path to iterate</span>
+<span class="sd">		@param include_dirs: include directories in output</span>
+<span class="sd">		@param include_files: include files in output</span>
+<span class="sd">		@param name_regex: optional regex string compared against basename of file</span>
+<span class="sd">		@param not_name_regex: if specificed only produces names not matching this regex</span>
+<span class="sd">		@param whole_name_regex: like name_regex but applies to whole path, not just basename</span>
+<span class="sd">		@param not_whole_name_regex: like not_name_regex but applies to whole path</span>
+<span class="sd">		@param exclude_root: do not include the intput &#39;path&#39; itself in the output</span>
+<span class="sd">		@param limit_depth: do not list items deeper than this level from root</span>
+<span class="sd">		@param relative: filenames are relative to &quot;path&quot; as opposed to appended to path</span>
+<span class="sd">		@return: a generator for the matched files</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="nf">maybe_regex</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+		<span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">if</span> <span class="n">arg</span> <span class="o">!=</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+	<span class="n">c_name_regex</span> <span class="o">=</span> <span class="n">maybe_regex</span><span class="p">(</span><span class="n">name_regex</span><span class="p">)</span>
+	<span class="n">c_not_name_regex</span> <span class="o">=</span> <span class="n">maybe_regex</span><span class="p">(</span><span class="n">not_name_regex</span><span class="p">)</span>
+	<span class="n">c_whole_name_regex</span> <span class="o">=</span> <span class="n">maybe_regex</span><span class="p">(</span><span class="n">whole_name_regex</span><span class="p">)</span>
+	<span class="n">c_not_whole_name_regex</span> <span class="o">=</span> <span class="n">maybe_regex</span><span class="p">(</span><span class="n">not_whole_name_regex</span><span class="p">)</span>
+	
+	<span class="k">def</span> <span class="nf">check_name</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">whole_name</span><span class="p">):</span>
+		<span class="k">if</span> <span class="n">c_name_regex</span> <span class="o">!=</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">c_name_regex</span><span class="o">.</span><span class="n">match</span><span class="p">(</span> <span class="n">name</span> <span class="p">):</span>
+			<span class="k">return</span> <span class="kc">False</span>
+		<span class="k">if</span> <span class="n">c_not_name_regex</span> <span class="o">!=</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">c_not_name_regex</span><span class="o">.</span><span class="n">match</span><span class="p">(</span> <span class="n">name</span> <span class="p">):</span>
+			<span class="k">return</span> <span class="kc">False</span>
+		<span class="k">if</span> <span class="n">c_whole_name_regex</span> <span class="o">!=</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">c_whole_name_regex</span><span class="o">.</span><span class="n">match</span><span class="p">(</span> <span class="n">whole_name</span> <span class="p">):</span>
+			<span class="k">return</span> <span class="kc">False</span>
+		<span class="k">if</span> <span class="n">c_not_whole_name_regex</span> <span class="o">!=</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">c_not_whole_name_regex</span><span class="o">.</span><span class="n">match</span><span class="p">(</span> <span class="n">whole_name</span> <span class="p">):</span>
+			<span class="k">return</span> <span class="kc">False</span>
+		<span class="k">return</span> <span class="kc">True</span>
+		
+	<span class="k">def</span> <span class="nf">result</span><span class="p">(</span> <span class="n">whole</span><span class="p">,</span> <span class="n">rel</span> <span class="p">):</span>
+		<span class="k">if</span> <span class="n">relative</span><span class="p">:</span>
+			<span class="k">return</span> <span class="n">rel</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">return</span> <span class="n">whole</span>
+			
+	<span class="k">def</span> <span class="nf">filter_func</span><span class="p">():</span>
+		<span class="c1"># A list of paths still to be processed (depth, whole_path, relative_path) </span>
+		<span class="n">queue</span> <span class="o">=</span> <span class="p">[</span> <span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="s1">&#39;&#39;</span> <span class="p">)</span> <span class="p">]</span>
+
+		<span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">queue</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+			<span class="n">depth</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">rel_path</span> <span class="o">=</span> <span class="n">queue</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+			<span class="n">queue</span> <span class="o">=</span> <span class="n">queue</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+			
+			<span class="k">if</span> <span class="n">root</span> <span class="o">==</span> <span class="n">path</span> <span class="ow">and</span> <span class="n">exclude_root</span><span class="p">:</span>
+				<span class="k">pass</span>
+			<span class="k">elif</span> <span class="n">include_dirs</span> <span class="ow">and</span> <span class="n">check_name</span><span class="p">(</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">root</span><span class="p">),</span> <span class="n">root</span> <span class="p">):</span>
+				<span class="k">yield</span> <span class="n">result</span><span class="p">(</span> <span class="n">root</span><span class="p">,</span> <span class="n">rel_path</span> <span class="p">)</span>
+				
+			<span class="k">if</span> <span class="n">limit_depth</span> <span class="o">!=</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">depth</span> <span class="o">&gt;</span> <span class="n">limit_depth</span><span class="p">:</span>
+				<span class="k">continue</span>
+				
+			<span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+				<span class="n">whole</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="n">root</span><span class="p">,</span> <span class="n">item</span> <span class="p">)</span>
+				<span class="n">rel</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="n">rel_path</span><span class="p">,</span> <span class="n">item</span> <span class="p">)</span>
+					
+				<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">whole</span><span class="p">):</span>
+					<span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span> <span class="n">depth</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">whole</span><span class="p">,</span> <span class="n">rel</span> <span class="p">)</span> <span class="p">)</span>
+				<span class="k">elif</span> <span class="n">include_files</span> <span class="ow">and</span> <span class="n">check_name</span><span class="p">(</span> <span class="n">item</span><span class="p">,</span> <span class="n">whole</span> <span class="p">):</span>
+					<span class="k">yield</span> <span class="n">result</span><span class="p">(</span> <span class="n">whole</span><span class="p">,</span> <span class="n">rel</span> <span class="p">)</span>
+	
+	<span class="k">return</span> <span class="n">filter_func</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="NamedTempFile"><a class="viewcode-back" href="../../shelljob.html#shelljob.fs.NamedTempFile">[docs]</a><span class="k">class</span> <span class="nc">NamedTempFile</span><span class="p">:</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Creates a temporary file for a &#39;with&#39; block. The file is deleted when the block exits.</span>
+<span class="sd">		This creates the file to ensure it exists/block a race, but does not write anything to</span>
+<span class="sd">		it, nor does it keep it open. It is intended for times when you need a named file</span>
+<span class="sd">		for subprocesses.</span>
+<span class="sd">		</span>
+<span class="sd">		Example::</span>
+<span class="sd">		</span>
+<span class="sd">			with fs.NamedTempFile() as nm:</span>
+<span class="sd">				proc.call( &quot;curl http://mortoray.com/ -o {}&quot;.format( nm ) )</span>
+<span class="sd">				html = open(nm).read()</span>
+<span class="sd">				print( len(html) )</span>
+<span class="sd">		</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">suffix</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">prefix</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">dir</span> <span class="o">=</span> <span class="kc">None</span> <span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			@param suffix: optional suffix for generated filename (a dot &#39;.&#39; is not automatically added, </span>
+<span class="sd">				specifiy it if desired)</span>
+<span class="sd">			@param prefix: optional prefix for generated filename</span>
+<span class="sd">			@param dir: in which directory, if None then use a system default</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="p">{</span>
+			<span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+		<span class="p">}</span>
+		<span class="k">if</span> <span class="n">suffix</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;suffix&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">suffix</span>
+		<span class="k">if</span> <span class="n">prefix</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;prefix&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prefix</span>
+		<span class="k">if</span> <span class="nb">dir</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;dir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dir</span>
+		
+	<span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>	
+		<span class="p">(</span><span class="n">handle</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkstemp</span><span class="p">(</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="p">)</span>
+		<span class="n">os</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">handle</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+		<span class="k">return</span> <span class="n">name</span>
+		
+	<span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
+		<span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+		
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">shelljob</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../shelljob.html">shelljob package</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, edA-qa mort-ora-y.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

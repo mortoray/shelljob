@@ -1,0 +1,371 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>shelljob.proc &#8212; shelljob 0.5.5 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for shelljob.proc</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Subprocess containers</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	A mechanism to run subprocesses asynchronously and with non-blocking read.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">atexit</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
+<span class="kn">import</span> <span class="nn">queue</span>
+<span class="kn">import</span> <span class="nn">shlex</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<div class="viewcode-block" id="CommandException"><a class="viewcode-back" href="../../shelljob.html#shelljob.proc.CommandException">[docs]</a><span class="k">class</span> <span class="nc">CommandException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">msg</span> <span class="p">):</span>
+		<span class="nb">super</span><span class="p">(</span><span class="n">CommandException</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span> <span class="n">msg</span> <span class="p">)</span></div>
+		
+<div class="viewcode-block" id="Group"><a class="viewcode-back" href="../../shelljob.html#shelljob.proc.Group">[docs]</a><span class="k">class</span> <span class="nc">Group</span><span class="p">:</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Runs a subprocess in parallel, capturing it&#39;s output and providing non-blocking reads (well, at</span>
+<span class="sd">		least for the caller they appear non-blocking).</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">output</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">handles</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">waiting</span> <span class="o">=</span> <span class="mi">0</span>
+		
+<div class="viewcode-block" id="Group.run"><a class="viewcode-back" href="../../shelljob.html#shelljob.proc.Group.run">[docs]</a>	<span class="k">def</span> <span class="nf">run</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">shell</span> <span class="o">=</span> <span class="kc">False</span> <span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			Adds a new process to this object. This process is run and the output collected.</span>
+<span class="sd">			</span>
+<span class="sd">			@param cmd: the command to execute. This may be an array as passed to Popen,</span>
+<span class="sd">				or a string, which will be parsed by &#39;shlex.split&#39;</span>
+<span class="sd">			@return: the handle to the process return from Popen</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_run_impl</span><span class="p">(</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">shell</span> <span class="p">)</span>
+		<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="n">CommandException</span><span class="p">(</span> <span class="s2">&quot;Group.run &#39;</span><span class="si">{}</span><span class="s2">&#39; failed&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="n">cmd</span> <span class="p">)</span> <span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span></div>
+		
+	<span class="k">def</span> <span class="nf">_run_impl</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">shell</span> <span class="p">):</span>
+		<span class="n">cmd</span> <span class="o">=</span> <span class="n">_expand_cmd</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+			
+		<span class="n">handle</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span> <span class="n">cmd</span><span class="p">,</span>
+			<span class="n">shell</span> <span class="o">=</span> <span class="n">shell</span><span class="p">,</span>
+			<span class="n">bufsize</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+			<span class="n">stdout</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+			<span class="n">stderr</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">STDOUT</span><span class="p">,</span>
+			<span class="n">stdin</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="c1"># needed to detach from calling terminal (other wacky things can happen)</span>
+			<span class="n">close_fds</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+		<span class="p">)</span>
+		<span class="n">handle</span><span class="o">.</span><span class="n">group_output_done</span> <span class="o">=</span> <span class="kc">False</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">handle</span> <span class="p">)</span>
+		
+		<span class="c1"># a thread is created to do blocking-read</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">waiting</span> <span class="o">+=</span> <span class="mi">1</span>
+		<span class="k">def</span> <span class="nf">block_read</span><span class="p">():</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">iter</span><span class="p">(</span> <span class="n">handle</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">readline</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span> <span class="p">):</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">put</span><span class="p">(</span> <span class="p">(</span> <span class="n">handle</span><span class="p">,</span> <span class="n">line</span> <span class="p">)</span> <span class="p">)</span>
+			<span class="k">except</span><span class="p">:</span>
+				<span class="k">pass</span>
+				
+			<span class="c1"># To force return of any waiting read (and indicate this process is done</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">put</span><span class="p">(</span> <span class="p">(</span> <span class="n">handle</span><span class="p">,</span> <span class="kc">None</span> <span class="p">)</span> <span class="p">)</span>
+			<span class="n">handle</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+			<span class="n">handle</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">waiting</span> <span class="o">-=</span> <span class="mi">1</span>
+			
+		<span class="n">block_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span> <span class="n">target</span> <span class="o">=</span> <span class="n">block_read</span> <span class="p">)</span>
+		<span class="n">block_thread</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+		<span class="n">block_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+			
+		<span class="c1"># kill child when parent dies</span>
+		<span class="k">def</span> <span class="nf">premature_exit</span><span class="p">():</span>
+			<span class="k">try</span><span class="p">:</span> 
+				<span class="n">handle</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+			<span class="k">except</span><span class="p">:</span>
+				<span class="k">pass</span> <span class="c1"># who cares why, we&#39;re exiting anyway (most likely since it is already terminated)</span>
+		<span class="n">atexit</span><span class="o">.</span><span class="n">register</span><span class="p">(</span> <span class="n">premature_exit</span> <span class="p">)</span>
+			
+		<span class="k">return</span> <span class="n">handle</span>
+		
+<div class="viewcode-block" id="Group.readlines"><a class="viewcode-back" href="../../shelljob.html#shelljob.proc.Group.readlines">[docs]</a>	<span class="k">def</span> <span class="nf">readlines</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">max_lines</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>  <span class="n">timeout</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			Reads available lines from any of the running processes. If no lines are available now</span>
+<span class="sd">			it will wait until &#39;timeout&#39; to read a line. If nothing is running the timeout is not waited</span>
+<span class="sd">			and the function simply returns.</span>
+<span class="sd">			</span>
+<span class="sd">			When a process has been completed and all output has been read from it, a</span>
+<span class="sd">			variable &#39;group_ouput_done&#39; will be set to True on the process handle.</span>
+<span class="sd">			</span>
+<span class="sd">			@param timeout: how long to wait if there is nothing available now</span>
+<span class="sd">			@param max_lines: maximum number of lines to get at once</span>
+<span class="sd">			@return: An array of tuples of the form:</span>
+<span class="sd">				( handle, line )</span>
+<span class="sd">				There &#39;handle&#39; was returned by &#39;run&#39; and &#39;line&#39; is the line which is read.</span>
+<span class="sd">				If no line is available an empty list is returned.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">max_lines</span><span class="p">:</span>
+				<span class="n">handle</span><span class="p">,</span> <span class="n">line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">get_nowait</span><span class="p">()</span>
+				<span class="c1"># interrupt waiting if nothing more is expected</span>
+				<span class="k">if</span> <span class="n">line</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+					<span class="n">handle</span><span class="o">.</span><span class="n">group_output_done</span> <span class="o">=</span> <span class="kc">True</span>
+					<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">waiting</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+						<span class="k">break</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span> <span class="n">handle</span><span class="p">,</span> <span class="n">line</span> <span class="p">)</span> <span class="p">)</span>
+			<span class="k">return</span> <span class="n">lines</span>
+			
+		<span class="k">except</span> <span class="n">queue</span><span class="o">.</span><span class="n">Empty</span><span class="p">:</span>
+			<span class="c1"># if nothing yet, then wait for something</span>
+			<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">waiting</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+				<span class="k">return</span> <span class="n">lines</span>
+			
+			<span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">readline</span><span class="p">(</span> <span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span> <span class="p">)</span>
+			<span class="k">if</span> <span class="n">item</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+				<span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">item</span> <span class="p">)</span>
+			<span class="k">return</span> <span class="n">lines</span></div>
+			
+<div class="viewcode-block" id="Group.readline"><a class="viewcode-back" href="../../shelljob.html#shelljob.proc.Group.readline">[docs]</a>	<span class="k">def</span> <span class="nf">readline</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			Read a single line from any running process.</span>
+<span class="sd">			</span>
+<span class="sd">			Note that this will end up blocking for timeout once all processes have completed.</span>
+<span class="sd">			&#39;readlines&#39; however can properly handle that situation and stop reading once</span>
+<span class="sd">			everything is complete.</span>
+<span class="sd">			</span>
+<span class="sd">			@return: Tuple of ( handle, line ) or None if no output generated.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">handle</span><span class="p">,</span> <span class="n">line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">get</span><span class="p">(</span> <span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span> <span class="p">)</span>
+			<span class="k">if</span> <span class="n">line</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+				<span class="n">handle</span><span class="o">.</span><span class="n">group_output_done</span> <span class="o">=</span> <span class="kc">True</span>
+				<span class="k">return</span> <span class="kc">None</span>
+			<span class="k">return</span> <span class="p">(</span><span class="n">handle</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+		<span class="k">except</span> <span class="n">queue</span><span class="o">.</span><span class="n">Empty</span><span class="p">:</span>
+			<span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="Group.is_pending"><a class="viewcode-back" href="../../shelljob.html#shelljob.proc.Group.is_pending">[docs]</a>	<span class="k">def</span> <span class="nf">is_pending</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			Determine if calling readlines would actually yield any output. This returns true</span>
+<span class="sd">			if there is a process running or there is data in the queue.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">waiting</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+			<span class="k">return</span> <span class="kc">True</span>
+		<span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">empty</span><span class="p">()</span></div>
+		
+<div class="viewcode-block" id="Group.count_running"><a class="viewcode-back" href="../../shelljob.html#shelljob.proc.Group.count_running">[docs]</a>	<span class="k">def</span> <span class="nf">count_running</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			Return the number of processes still running. Note that although a process may</span>
+<span class="sd">			be finished there could still be output from it in the queue. You should use &#39;is_pending&#39;</span>
+<span class="sd">			to determine if you should still be reading.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+		<span class="k">for</span> <span class="n">handle</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">handles</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">handle</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+				<span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+		<span class="k">return</span> <span class="n">count</span></div>
+		
+<div class="viewcode-block" id="Group.get_exit_codes"><a class="viewcode-back" href="../../shelljob.html#shelljob.proc.Group.get_exit_codes">[docs]</a>	<span class="k">def</span> <span class="nf">get_exit_codes</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			Return a list of all processes and their exit code.</span>
+<span class="sd">			</span>
+<span class="sd">			@return: A list of tuples:</span>
+<span class="sd">				( handle, exit_code )</span>
+<span class="sd">				&#39;handle&#39; as returned from &#39;run&#39;</span>
+<span class="sd">				&#39;exit_code&#39; of the process or None if it has not yet finished</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">codes</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="k">for</span> <span class="n">handle</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">handles</span><span class="p">:</span>
+			<span class="n">codes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span> <span class="n">handle</span><span class="p">,</span> <span class="n">handle</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span> <span class="p">)</span> <span class="p">)</span>
+		<span class="k">return</span> <span class="n">codes</span></div>
+		
+<div class="viewcode-block" id="Group.clear_finished"><a class="viewcode-back" href="../../shelljob.html#shelljob.proc.Group.clear_finished">[docs]</a>	<span class="k">def</span> <span class="nf">clear_finished</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">			Remove all finished processes from the managed list.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">nhandles</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="k">for</span> <span class="n">handle</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">handles</span><span class="p">:</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">handle</span><span class="o">.</span><span class="n">group_output_done</span> <span class="ow">or</span> <span class="n">handle</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+				<span class="n">nhandles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">handle</span> <span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">handles</span> <span class="o">=</span> <span class="n">nhandles</span></div>
+		
+		
+<div class="viewcode-block" id="Group.close"><a class="viewcode-back" href="../../shelljob.html#shelljob.proc.Group.close">[docs]</a>	<span class="k">def</span> <span class="nf">close</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot; Experimental closing of all handles, even if they haven&#39;t finished. This likely doesn&#39;t work on all platforms &quot;&quot;&quot;</span>
+		<span class="k">for</span> <span class="n">handle</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">handles</span><span class="p">:</span>
+			<span class="n">handle</span><span class="o">.</span><span class="n">group_output_done</span> <span class="o">=</span> <span class="kc">True</span>
+			<span class="n">handle</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+			
+		<span class="bp">self</span><span class="o">.</span><span class="n">get_exit_codes</span><span class="p">()</span></div></div>
+		
+
+
+<div class="viewcode-block" id="BadExitCode"><a class="viewcode-back" href="../../shelljob.html#shelljob.proc.BadExitCode">[docs]</a><span class="k">class</span> <span class="nc">BadExitCode</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exit_code</span><span class="p">,</span> <span class="n">output</span><span class="p">):</span>
+		<span class="ne">Exception</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;subprocess-bad-exit-code: </span><span class="si">{}</span><span class="s1">: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="n">exit_code</span><span class="p">,</span> <span class="n">output</span><span class="p">[:</span><span class="mi">1024</span><span class="p">]</span> <span class="p">)</span> <span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">exit_code</span> <span class="o">=</span> <span class="n">exit_code</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">output</span> <span class="o">=</span> <span class="n">output</span></div>
+	
+<div class="viewcode-block" id="Timeout"><a class="viewcode-back" href="../../shelljob.html#shelljob.proc.Timeout">[docs]</a><span class="k">class</span> <span class="nc">Timeout</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output</span><span class="p">):</span>
+		<span class="ne">Exception</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;subprocess-timeout&#39;</span> <span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">output</span> <span class="o">=</span> <span class="n">output</span></div>
+		
+<div class="viewcode-block" id="call"><a class="viewcode-back" href="../../shelljob.html#shelljob.proc.call">[docs]</a><span class="k">def</span> <span class="nf">call</span><span class="p">(</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">encoding</span> <span class="o">=</span> <span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">shell</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">check_exit_code</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">cwd</span> <span class="o">=</span> <span class="kc">None</span> <span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Calls a subprocess and returns the output and optionally exit code.</span>
+<span class="sd">		</span>
+<span class="sd">		@param encoding: convert output to unicode objects with this encoding, set to None to</span>
+<span class="sd">			get the raw output</span>
+<span class="sd">		@param check_exit_code: set to False to ignore the exit code, otherwise any non-zero</span>
+<span class="sd">			result will throw BadExitCode.</span>
+<span class="sd">		@param timeout: If specified only this amount of time (seconds) will be waited for</span>
+<span class="sd">			the subprocess to return</span>
+<span class="sd">		@return: If check_exit_code is False: list( output, exit_code ), else just the output</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">cmd</span> <span class="o">=</span> <span class="n">_expand_cmd</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+	<span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">stdout</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">STDOUT</span><span class="p">,</span>
+		<span class="n">stdin</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">shell</span> <span class="o">=</span> <span class="n">shell</span><span class="p">,</span> <span class="n">cwd</span> <span class="o">=</span> <span class="n">cwd</span> <span class="p">)</span>
+
+	<span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="n">out</span><span class="p">):</span>
+		<span class="k">if</span> <span class="n">encoding</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="k">return</span> <span class="n">out</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span> <span class="n">encoding</span> <span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">return</span> <span class="n">raw_out</span>
+	
+	<span class="k">if</span> <span class="n">timeout</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+		<span class="n">raw_out</span><span class="p">,</span> <span class="n">ignore_err</span> <span class="o">=</span> <span class="n">proc</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="c1"># Read from subprocess in a thread so the main one can check for the timeout</span>
+		<span class="n">outq</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
+		<span class="k">def</span> <span class="nf">block_read</span><span class="p">():</span>
+			<span class="n">out</span> <span class="o">=</span> <span class="n">proc</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+			<span class="c1"># wait before pushing, occassionally read returns prior to process terminating,</span>
+			<span class="c1"># thus &quot;poll&quot; would return None</span>
+			<span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+			<span class="n">outq</span><span class="o">.</span><span class="n">put</span><span class="p">(</span> <span class="n">out</span> <span class="p">)</span>
+			
+		<span class="n">block_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span> <span class="n">target</span> <span class="o">=</span> <span class="n">block_read</span> <span class="p">)</span>
+		<span class="n">block_thread</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+		<span class="n">block_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">raw_out</span> <span class="o">=</span> <span class="n">outq</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span><span class="n">timeout</span><span class="p">)</span>
+		<span class="k">except</span> <span class="n">queue</span><span class="o">.</span><span class="n">Empty</span><span class="p">:</span>
+			<span class="n">proc</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+			<span class="c1"># wait again for partial output (process is terminated, so reading should end)</span>
+			<span class="n">raw_out</span> <span class="o">=</span> <span class="n">outq</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+			<span class="k">raise</span> <span class="n">Timeout</span><span class="p">(</span> <span class="n">decode</span><span class="p">(</span><span class="n">raw_out</span><span class="p">)</span> <span class="p">)</span>
+	
+	<span class="n">out</span> <span class="o">=</span> <span class="n">decode</span><span class="p">(</span><span class="n">raw_out</span><span class="p">)</span>
+	<span class="n">exit_code</span> <span class="o">=</span> <span class="n">proc</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span>
+	
+	<span class="k">if</span> <span class="n">check_exit_code</span><span class="p">:</span>
+		<span class="k">if</span> <span class="n">exit_code</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="n">BadExitCode</span><span class="p">(</span> <span class="n">exit_code</span><span class="p">,</span> <span class="n">out</span> <span class="p">)</span>
+		<span class="k">return</span> <span class="n">out</span>
+		
+	<span class="k">return</span> <span class="p">(</span> <span class="n">out</span><span class="p">,</span> <span class="n">proc</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span> <span class="p">)</span></div>
+	
+<span class="k">def</span> <span class="nf">_expand_cmd</span><span class="p">(</span><span class="n">cmd</span><span class="p">):</span>
+	<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+		<span class="n">cmd</span> <span class="o">=</span> <span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+	<span class="k">return</span> <span class="n">cmd</span>
+	
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">shelljob</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../shelljob.html">shelljob package</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, edA-qa mort-ora-y.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

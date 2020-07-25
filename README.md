@@ -77,6 +77,3 @@ print( "\n".join(files) )
 Refer to the [API docs](http://pythonhosted.org/shelljob/) for all parameters. Just let me know if there is some additional option you need.
 
 
-# Issues
-
-You can use my [Launchpad project](https://bugs.launchpad.net/mortoray.com) to submit issues.
