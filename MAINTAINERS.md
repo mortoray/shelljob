@@ -13,14 +13,14 @@ export PYTHONPATH=/src/shelljob/src/
 ## Local install for development/testing
 
 ```
-pip3 install -e .
+python3.6 -m venv env
+source env/bin/activate
+pip install pytest
+pip install -e /src/shelljob
+pytest /src/shelljob/test
 ```
 
-To Remove:
 
-```
-cd /usr/local/lib/python2.7/dist-packages
-rm shelljob.egg-link
-```
+## Documentation
 
-Also remove from easy-install.pth
+sudo apt-get install python3-sphinx

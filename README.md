@@ -11,7 +11,12 @@ Additional tools for working with the filesystem are also included:
 - `find` which offers much of the functionality of the shell find utility
 - `shelljob.fs.NamedTempFile` provides a _with_ block wrapper for temporary named files
 
-> NOTE: Only the Python 3 form is now maintained. The Python 2 is still included for backwards compatibility but will not likely get new features.
+
+# Install
+
+```
+pip install shelljob
+```
 
 # Parallel Subprocesses
 
