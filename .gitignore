@@ -6,3 +6,5 @@ src/shelljob/doc
 MANIFEST
 
 
+dist/
+build/

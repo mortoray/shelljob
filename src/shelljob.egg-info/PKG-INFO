@@ -1,8 +1,8 @@
 Metadata-Version: 2.1
 Name: shelljob
-Version: 0.6
+Version: 0.6.1
 Summary: Run multiple subprocesses asynchronous/in parallel with streamed output/non-blocking reading. Also various tools to replace shell scripts.
-Home-page: https://pypi.python.org/pypi/shelljob
+Home-page: https://github.com/mortoray/shelljob/
 Author: edA-qa mort-ora-y
 Author-email: eda-qa@disemia.com
 License: GPLv3

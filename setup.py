@@ -17,11 +17,11 @@ setup(
 	package_dir = {
 		'': base_dir,
 	},
-	version = '0.6',
+	version = '0.6.1',
 	description = 'Run multiple subprocesses asynchronous/in parallel with streamed output/non-blocking reading. Also various tools to replace shell scripts.',
 	author = 'edA-qa mort-ora-y',
 	author_email = 'eda-qa@disemia.com',
-	url = 'https://pypi.python.org/pypi/shelljob',
+	url = 'https://github.com/mortoray/shelljob/',
 	classifiers = [
 		'Development Status :: 6 - Mature',
 		'Programming Language :: Python',
