@@ -52,6 +52,12 @@ while g.is_pending():
 		sys.stdout.write( "{}:{}".format( proc.pid, line ) )
 ````
 
+## Encoding
+
+By default the output will be binary encoding. You can specify an `encoding='utf-8'` to the `run` command to use an encoded text stream instead. Be aware that if the encoding fails (the program emits an invalid sequence) the running will be interrupted. You should also use the `on_error` function to check for this.
+
+Line-endings will always be preserved.
+
 # Simple Subprocess calls
 
 A simplified `call` function allows timeouts on subprocesses and easy acces to their output.

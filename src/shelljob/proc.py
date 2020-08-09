@@ -25,29 +25,33 @@ class Group:
 		self.handles = []
 		self.waiting = 0
 		
-	def run( self, cmd, shell = False ):
+	def run( self, cmd, shell = False, encoding = None, on_error = None ):
 		"""
 			Adds a new process to this object. This process is run and the output collected.
 			
 			@param cmd: the command to execute. This may be an array as passed to Popen,
 				or a string, which will be parsed by 'shlex.split'
+			@param shell: should it be run in a shell (see call)
+			@param encoding: should lines be decoded automatically. Be aware if the decoding fails then the streaming will be interrupted.
+			@param on_error: Called with any exception generated in the processing.
 			@return: the handle to the process return from Popen
 		"""
 		try:
-			return self._run_impl( cmd, shell )
+			return self._run_impl( cmd=cmd, shell=shell, encoding=encoding, on_error=on_error )
 		except Exception as e:
 			raise CommandException( "Group.run '{}' failed".format( cmd ) ) from e
 		
-	def _run_impl( self, cmd, shell ):
+	def _run_impl( self, *, cmd, shell, encoding, on_error ):
 		cmd = _expand_cmd(cmd)
 			
 		handle = subprocess.Popen( cmd,
 			shell = shell,
-			bufsize = 1,
+			bufsize = 1 if encoding else 0,
 			stdout = subprocess.PIPE,
 			stderr = subprocess.STDOUT,
 			stdin = subprocess.PIPE, # needed to detach from calling terminal (other wacky things can happen)
 			close_fds = True,
+			encoding = encoding,
 		)
 		handle.group_output_done = False
 		self.handles.append( handle )
@@ -56,9 +60,11 @@ class Group:
 		self.waiting += 1
 		def block_read():
 			try:
-				for line in iter( handle.stdout.readline, b'' ):
+				for line in iter( handle.stdout.readline, '' if encoding else b'' ):
 					self.output.put( ( handle, line ) )
-			except:
+			except Exception as e:
+				if on_error is not None:
+					on_error(e)
 				pass
 				
 			# To force return of any waiting read (and indicate this process is done

@@ -26,3 +26,18 @@ def test_timeout():
 
 def test_not_timeout():
 	proc.call( 'sleep 1', timeout = 10 )
+
+
+def test_encoding():
+	output = proc.call( ['cat', 'happy.txt'] )
+	assert output == 'Häppy ☺\n' # 'cat' appends a newline
+	
+	try:
+		bad = proc.call( ['cat', 'UTF-8-test.txt'] )
+		assert False
+	except UnicodeDecodeError:
+		assert True
+	
+
+if __name__ == '__main__':
+	test_encoding()
