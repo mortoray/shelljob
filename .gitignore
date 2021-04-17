@@ -8,3 +8,4 @@ MANIFEST
 
 dist/
 build/
+src/shelljob.egg-info/

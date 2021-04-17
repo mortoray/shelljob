@@ -13,8 +13,9 @@ docs:
 
 
 upload:
+	rm -fr dist
 	python setup.py bdist_wheel
-	twine upload dist/*.whl dist/*.gz
+	twine upload dist/*.whl 
 	
 	
 register:
