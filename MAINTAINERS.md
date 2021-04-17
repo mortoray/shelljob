@@ -10,6 +10,13 @@ In 'activate':
 export PYTHONPATH=/src/shelljob/src/
 ```
 
+Then install requirements for development:
+
+```
+source env/bin/activate
+pip install -r dev_requirements.txt
+```
+
 ## Local install for development/testing
 
 ```
@@ -20,7 +27,3 @@ pip install -e /src/shelljob
 pytest /src/shelljob/test
 ```
 
-
-## Documentation
-
-sudo apt-get install python3-sphinx

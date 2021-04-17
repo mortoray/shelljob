@@ -13,6 +13,7 @@ Additional tools for working with the filesystem are also included:
 
 [API Documentation](https://mortoray.github.io/shelljob/)
 
+I use this actively in my own projects, such as my online escape games at  [Edaqa's Room](https://edaqasroom.com/). I've not needed any new features in a while -- it's a fairly stable package.
 
 # Install
 
