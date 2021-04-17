@@ -8,7 +8,6 @@ test:
 docs:
 	#!/bin/bash
 	source env/bin/activate
-	cd doc
 	python -m sphinx doc-in docs
 	touch docs/.nojekyll
 
@@ -20,3 +19,6 @@ upload:
 	
 register:
 	python setup.py register
+
+freeze:
+	pip freeze > dev_requirements.txt

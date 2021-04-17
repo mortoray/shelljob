@@ -4,15 +4,14 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>shelljob package &#8212; shelljob 0.5.5 documentation</title>
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
-    <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="prev" title="Welcome to shelljob’s documentation!" href="index.html" />
@@ -42,7 +41,7 @@
 <p>A collection of filesystem related commands.</p>
 <dl class="py class">
 <dt id="shelljob.fs.NamedTempFile">
-<em class="property">class </em><code class="sig-prename descclassname">shelljob.fs.</code><code class="sig-name descname">NamedTempFile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">suffix</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">prefix</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dir</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/fs.html#NamedTempFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shelljob.fs.NamedTempFile" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">shelljob.fs.</span></code><code class="sig-name descname"><span class="pre">NamedTempFile</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/fs.html#NamedTempFile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shelljob.fs.NamedTempFile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Creates a temporary file for a ‘with’ block. The file is deleted when the block exits.
 This creates the file to ensure it exists/block a race, but does not write anything to
@@ -59,7 +58,7 @@ for subprocesses.</p>
 
 <dl class="py function">
 <dt id="shelljob.fs.find">
-<code class="sig-prename descclassname">shelljob.fs.</code><code class="sig-name descname">find</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">include_dirs</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">include_files</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">name_regex</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">not_name_regex</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">whole_name_regex</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">not_whole_name_regex</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">exclude_root</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">relative</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">limit_depth</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/fs.html#find"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shelljob.fs.find" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">shelljob.fs.</span></code><code class="sig-name descname"><span class="pre">find</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_dirs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_files</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_regex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">not_name_regex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">whole_name_regex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">not_whole_name_regex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relative</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/fs.html#find"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shelljob.fs.find" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates an iterator of files matching a variety of conditions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -88,7 +87,7 @@ for subprocesses.</p>
 <p>A basic monitor that provides a more convenient use of the process Groups.</p>
 <dl class="py class">
 <dt id="shelljob.job.FileMonitor">
-<em class="property">class </em><code class="sig-prename descclassname">shelljob.job.</code><code class="sig-name descname">FileMonitor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_pattern</span><span class="o">=</span><span class="default_value">'/tmp/job_{}.log'</span></em>, <em class="sig-param"><span class="n">meta</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#FileMonitor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shelljob.job.FileMonitor" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">shelljob.job.</span></code><code class="sig-name descname"><span class="pre">FileMonitor</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/tmp/job_{}.log'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#FileMonitor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shelljob.job.FileMonitor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#shelljob.job.Monitor" title="shelljob.job.Monitor"><code class="xref py py-class docutils literal notranslate"><span class="pre">shelljob.job.Monitor</span></code></a></p>
 <p>A monitor which writes output to log files. Simple textual feedback will also be reported
 to the console.</p>
@@ -105,32 +104,32 @@ logfile</p></li>
 </dl>
 <dl class="py method">
 <dt id="shelljob.job.FileMonitor.gen_feedback">
-<code class="sig-name descname">gen_feedback</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#FileMonitor.gen_feedback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shelljob.job.FileMonitor.gen_feedback" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">gen_feedback</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#FileMonitor.gen_feedback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shelljob.job.FileMonitor.gen_feedback" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called whenever the Monitor things feedback should be generated (in addition to the other
 events). Generally this is called for each feedback_timeout period specified in the constructor.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="shelljob.job.FileMonitor.get_log_name">
-<code class="sig-name descname">get_log_name</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">job</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#FileMonitor.get_log_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shelljob.job.FileMonitor.get_log_name" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_log_name</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">job</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#FileMonitor.get_log_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shelljob.job.FileMonitor.get_log_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>(Virtual) get the log of the log file to use.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="shelljob.job.FileMonitor.job_finished">
-<code class="sig-name descname">job_finished</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">job</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#FileMonitor.job_finished"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shelljob.job.FileMonitor.job_finished" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">job_finished</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">job</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#FileMonitor.job_finished"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shelljob.job.FileMonitor.job_finished" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called when a job has completed.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="shelljob.job.FileMonitor.job_output">
-<code class="sig-name descname">job_output</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">job</span></em>, <em class="sig-param"><span class="n">line</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#FileMonitor.job_output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shelljob.job.FileMonitor.job_output" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">job_output</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">job</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#FileMonitor.job_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shelljob.job.FileMonitor.job_output" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called for each line of output from a job.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="shelljob.job.FileMonitor.job_started">
-<code class="sig-name descname">job_started</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">job</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#FileMonitor.job_started"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shelljob.job.FileMonitor.job_started" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">job_started</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">job</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#FileMonitor.job_started"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shelljob.job.FileMonitor.job_started" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called just after a job is started.</p>
 </dd></dl>
 
@@ -138,27 +137,27 @@ events). Generally this is called for each feedback_timeout period specified in 
 
 <dl class="py class">
 <dt id="shelljob.job.Job">
-<em class="property">class </em><code class="sig-prename descclassname">shelljob.job.</code><code class="sig-name descname">Job</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cmd</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#Job"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shelljob.job.Job" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">shelljob.job.</span></code><code class="sig-name descname"><span class="pre">Job</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmd</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#Job"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shelljob.job.Job" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py attribute">
 <dt id="shelljob.job.Job.STATUS_FINISHED">
-<code class="sig-name descname">STATUS_FINISHED</code><em class="property"> = 2</em><a class="headerlink" href="#shelljob.job.Job.STATUS_FINISHED" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">STATUS_FINISHED</span></code><em class="property"> <span class="pre">=</span> <span class="pre">2</span></em><a class="headerlink" href="#shelljob.job.Job.STATUS_FINISHED" title="Permalink to this definition">¶</a></dt>
 <dd><p>Encapsulates information about a job.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="shelljob.job.Job.STATUS_NONE">
-<code class="sig-name descname">STATUS_NONE</code><em class="property"> = 0</em><a class="headerlink" href="#shelljob.job.Job.STATUS_NONE" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">STATUS_NONE</span></code><em class="property"> <span class="pre">=</span> <span class="pre">0</span></em><a class="headerlink" href="#shelljob.job.Job.STATUS_NONE" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="shelljob.job.Job.STATUS_RUNNING">
-<code class="sig-name descname">STATUS_RUNNING</code><em class="property"> = 1</em><a class="headerlink" href="#shelljob.job.Job.STATUS_RUNNING" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">STATUS_RUNNING</span></code><em class="property"> <span class="pre">=</span> <span class="pre">1</span></em><a class="headerlink" href="#shelljob.job.Job.STATUS_RUNNING" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt id="shelljob.job.Job.get_ref_name">
-<code class="sig-name descname">get_ref_name</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#Job.get_ref_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shelljob.job.Job.get_ref_name" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_ref_name</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#Job.get_ref_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shelljob.job.Job.get_ref_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>A reference name suitable for using in identifiers and files.</p>
 </dd></dl>
 
@@ -166,48 +165,48 @@ events). Generally this is called for each feedback_timeout period specified in 
 
 <dl class="py class">
 <dt id="shelljob.job.Monitor">
-<em class="property">class </em><code class="sig-prename descclassname">shelljob.job.</code><code class="sig-name descname">Monitor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">max_simul</span><span class="o">=</span><span class="default_value">16</span></em>, <em class="sig-param"><span class="n">feedback_timeout</span><span class="o">=</span><span class="default_value">5.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#Monitor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shelljob.job.Monitor" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">shelljob.job.</span></code><code class="sig-name descname"><span class="pre">Monitor</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_simul</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feedback_timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#Monitor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shelljob.job.Monitor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt id="shelljob.job.Monitor.convert_cmds">
-<code class="sig-name descname">convert_cmds</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">in_cmds</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#Monitor.convert_cmds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shelljob.job.Monitor.convert_cmds" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">convert_cmds</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_cmds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#Monitor.convert_cmds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shelljob.job.Monitor.convert_cmds" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts a variable format input command list to a set of Jobs.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="shelljob.job.Monitor.gen_feedback">
-<code class="sig-name descname">gen_feedback</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#Monitor.gen_feedback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shelljob.job.Monitor.gen_feedback" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">gen_feedback</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#Monitor.gen_feedback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shelljob.job.Monitor.gen_feedback" title="Permalink to this definition">¶</a></dt>
 <dd><p>(Virtual) Called whenever the Monitor things feedback should be generated (in addition to the other
 events). Generally this is called for each feedback_timeout period specified in the constructor.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="shelljob.job.Monitor.get_jobs">
-<code class="sig-name descname">get_jobs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#Monitor.get_jobs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shelljob.job.Monitor.get_jobs" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_jobs</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#Monitor.get_jobs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shelljob.job.Monitor.get_jobs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the list of jobs.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="shelljob.job.Monitor.job_finished">
-<code class="sig-name descname">job_finished</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">job</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#Monitor.job_finished"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shelljob.job.Monitor.job_finished" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">job_finished</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">job</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#Monitor.job_finished"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shelljob.job.Monitor.job_finished" title="Permalink to this definition">¶</a></dt>
 <dd><p>(Virtual) Called when a job has completed.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="shelljob.job.Monitor.job_output">
-<code class="sig-name descname">job_output</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">job</span></em>, <em class="sig-param"><span class="n">line</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#Monitor.job_output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shelljob.job.Monitor.job_output" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">job_output</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">job</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#Monitor.job_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shelljob.job.Monitor.job_output" title="Permalink to this definition">¶</a></dt>
 <dd><p>(Virtual) Called for each line of output from a job.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="shelljob.job.Monitor.job_started">
-<code class="sig-name descname">job_started</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">job</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#Monitor.job_started"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shelljob.job.Monitor.job_started" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">job_started</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">job</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#Monitor.job_started"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shelljob.job.Monitor.job_started" title="Permalink to this definition">¶</a></dt>
 <dd><p>(Virtual) Called just after a job is started.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="shelljob.job.Monitor.run">
-<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cmds</span></em>, <em class="sig-param"><span class="n">shell</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#Monitor.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shelljob.job.Monitor.run" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">run</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shell</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/job.html#Monitor.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shelljob.job.Monitor.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run a series of commands and wait for their completion.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -226,37 +225,37 @@ additional data for use with each job – helpful for custom monitors.</p>
 <p>A mechanism to run subprocesses asynchronously and with non-blocking read.</p>
 <dl class="py exception">
 <dt id="shelljob.proc.BadExitCode">
-<em class="property">exception </em><code class="sig-prename descclassname">shelljob.proc.</code><code class="sig-name descname">BadExitCode</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">exit_code</span></em>, <em class="sig-param"><span class="n">output</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/proc.html#BadExitCode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shelljob.proc.BadExitCode" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">exception</span> </em><code class="sig-prename descclassname"><span class="pre">shelljob.proc.</span></code><code class="sig-name descname"><span class="pre">BadExitCode</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exit_code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/proc.html#BadExitCode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shelljob.proc.BadExitCode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
 </dd></dl>
 
 <dl class="py exception">
 <dt id="shelljob.proc.CommandException">
-<em class="property">exception </em><code class="sig-prename descclassname">shelljob.proc.</code><code class="sig-name descname">CommandException</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">msg</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/proc.html#CommandException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shelljob.proc.CommandException" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">exception</span> </em><code class="sig-prename descclassname"><span class="pre">shelljob.proc.</span></code><code class="sig-name descname"><span class="pre">CommandException</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/proc.html#CommandException"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shelljob.proc.CommandException" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
 </dd></dl>
 
 <dl class="py class">
 <dt id="shelljob.proc.Group">
-<em class="property">class </em><code class="sig-prename descclassname">shelljob.proc.</code><code class="sig-name descname">Group</code><a class="reference internal" href="_modules/shelljob/proc.html#Group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shelljob.proc.Group" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">shelljob.proc.</span></code><code class="sig-name descname"><span class="pre">Group</span></code><a class="reference internal" href="_modules/shelljob/proc.html#Group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shelljob.proc.Group" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Runs a subprocess in parallel, capturing it’s output and providing non-blocking reads (well, at
 least for the caller they appear non-blocking).</p>
 <dl class="py method">
 <dt id="shelljob.proc.Group.clear_finished">
-<code class="sig-name descname">clear_finished</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/proc.html#Group.clear_finished"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shelljob.proc.Group.clear_finished" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">clear_finished</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/proc.html#Group.clear_finished"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shelljob.proc.Group.clear_finished" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove all finished processes from the managed list.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="shelljob.proc.Group.close">
-<code class="sig-name descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/proc.html#Group.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shelljob.proc.Group.close" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">close</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/proc.html#Group.close"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shelljob.proc.Group.close" title="Permalink to this definition">¶</a></dt>
 <dd><p>Experimental closing of all handles, even if they haven’t finished. This likely doesn’t work on all platforms</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="shelljob.proc.Group.count_running">
-<code class="sig-name descname">count_running</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/proc.html#Group.count_running"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shelljob.proc.Group.count_running" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">count_running</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/proc.html#Group.count_running"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shelljob.proc.Group.count_running" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the number of processes still running. Note that although a process may
 be finished there could still be output from it in the queue. You should use ‘is_pending’
 to determine if you should still be reading.</p>
@@ -264,7 +263,7 @@ to determine if you should still be reading.</p>
 
 <dl class="py method">
 <dt id="shelljob.proc.Group.get_exit_codes">
-<code class="sig-name descname">get_exit_codes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/proc.html#Group.get_exit_codes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shelljob.proc.Group.get_exit_codes" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_exit_codes</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/proc.html#Group.get_exit_codes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shelljob.proc.Group.get_exit_codes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a list of all processes and their exit code.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -278,14 +277,14 @@ to determine if you should still be reading.</p>
 
 <dl class="py method">
 <dt id="shelljob.proc.Group.is_pending">
-<code class="sig-name descname">is_pending</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/proc.html#Group.is_pending"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shelljob.proc.Group.is_pending" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">is_pending</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/proc.html#Group.is_pending"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shelljob.proc.Group.is_pending" title="Permalink to this definition">¶</a></dt>
 <dd><p>Determine if calling readlines would actually yield any output. This returns true
 if there is a process running or there is data in the queue.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="shelljob.proc.Group.readline">
-<code class="sig-name descname">readline</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeout</span><span class="o">=</span><span class="default_value">2.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/proc.html#Group.readline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shelljob.proc.Group.readline" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">readline</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/proc.html#Group.readline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shelljob.proc.Group.readline" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read a single line from any running process.</p>
 <p>Note that this will end up blocking for timeout once all processes have completed.
 ‘readlines’ however can properly handle that situation and stop reading once
@@ -299,7 +298,7 @@ everything is complete.</p>
 
 <dl class="py method">
 <dt id="shelljob.proc.Group.readlines">
-<code class="sig-name descname">readlines</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">max_lines</span><span class="o">=</span><span class="default_value">1000</span></em>, <em class="sig-param"><span class="n">timeout</span><span class="o">=</span><span class="default_value">2.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/proc.html#Group.readlines"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shelljob.proc.Group.readlines" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">readlines</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_lines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/proc.html#Group.readlines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shelljob.proc.Group.readlines" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads available lines from any of the running processes. If no lines are available now
 it will wait until ‘timeout’ to read a line. If nothing is running the timeout is not waited
 and the function simply returns.</p>
@@ -323,12 +322,17 @@ If no line is available an empty list is returned.</p>
 
 <dl class="py method">
 <dt id="shelljob.proc.Group.run">
-<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cmd</span></em>, <em class="sig-param"><span class="n">shell</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/proc.html#Group.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shelljob.proc.Group.run" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">run</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shell</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/proc.html#Group.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shelljob.proc.Group.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a new process to this object. This process is run and the output collected.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>cmd</strong> – the command to execute. This may be an array as passed to Popen,
-or a string, which will be parsed by ‘shlex.split’</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cmd</strong> – the command to execute. This may be an array as passed to Popen,
+or a string, which will be parsed by ‘shlex.split’</p></li>
+<li><p><strong>shell</strong> – should it be run in a shell (see call)</p></li>
+<li><p><strong>encoding</strong> – should lines be decoded automatically. Be aware if the decoding fails then the streaming will be interrupted.</p></li>
+<li><p><strong>on_error</strong> – Called with any exception generated in the processing.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>the handle to the process return from Popen</p>
@@ -340,13 +344,13 @@ or a string, which will be parsed by ‘shlex.split’</p>
 
 <dl class="py exception">
 <dt id="shelljob.proc.Timeout">
-<em class="property">exception </em><code class="sig-prename descclassname">shelljob.proc.</code><code class="sig-name descname">Timeout</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">output</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/proc.html#Timeout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shelljob.proc.Timeout" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">exception</span> </em><code class="sig-prename descclassname"><span class="pre">shelljob.proc.</span></code><code class="sig-name descname"><span class="pre">Timeout</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/proc.html#Timeout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shelljob.proc.Timeout" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
 </dd></dl>
 
 <dl class="py function">
 <dt id="shelljob.proc.call">
-<code class="sig-prename descclassname">shelljob.proc.</code><code class="sig-name descname">call</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cmd</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">'utf-8'</span></em>, <em class="sig-param"><span class="n">shell</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">check_exit_code</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">timeout</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cwd</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/proc.html#call"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#shelljob.proc.call" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">shelljob.proc.</span></code><code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'utf-8'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shell</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_exit_code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cwd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/shelljob/proc.html#call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shelljob.proc.call" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calls a subprocess and returns the output and optionally exit code.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -431,10 +435,10 @@ the subprocess to return</p></li>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017, edA-qa mort-ora-y.
+      &copy;2017-2021, edA-qa mort-ora-y.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.4</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

@@ -18,9 +18,8 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 # import os
-# import sys
-# sys.path.insert(0, '/home/src/mortoray.com/master/src/shelljob/python3/shelljob')
-
+import sys
+sys.path.insert(0, 'src/')
 
 # -- General configuration ------------------------------------------------
 
@@ -50,7 +49,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'shelljob'
-copyright = '2017, edA-qa mort-ora-y'
+copyright = '2017-2021, edA-qa mort-ora-y'
 author = 'edA-qa mort-ora-y'
 
 # The version info for the project you're documenting, acts as replacement for
