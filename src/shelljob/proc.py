@@ -24,8 +24,8 @@ class Group:
 		self.output = queue.Queue()
 		self.handles = []
 		self.waiting = 0
-		
-	def run( self, cmd, shell = False, encoding = None, on_error = None ):
+
+	def run( self, cmd, shell = False, encoding = None, on_error = None, cwd = None):
 		"""
 			Adds a new process to this object. This process is run and the output collected.
 			
@@ -34,14 +34,15 @@ class Group:
 			@param shell: should it be run in a shell (see call)
 			@param encoding: should lines be decoded automatically. Be aware if the decoding fails then the streaming will be interrupted.
 			@param on_error: Called with any exception generated in the processing.
+			@param cwd path to execute cmd in
 			@return: the handle to the process return from Popen
 		"""
 		try:
-			return self._run_impl( cmd=cmd, shell=shell, encoding=encoding, on_error=on_error )
+			return self._run_impl( cmd=cmd, shell=shell, encoding=encoding, on_error=on_error, cwd=cwd )
 		except Exception as e:
 			raise CommandException( "Group.run '{}' failed".format( cmd ) ) from e
 		
-	def _run_impl( self, *, cmd, shell, encoding, on_error ):
+	def _run_impl( self, *, cmd, shell, encoding, on_error, cwd ):
 		cmd = _expand_cmd(cmd)
 			
 		handle = subprocess.Popen( cmd,
@@ -52,6 +53,7 @@ class Group:
 			stdin = subprocess.PIPE, # needed to detach from calling terminal (other wacky things can happen)
 			close_fds = True,
 			encoding = encoding,
+			cwd = cwd,
 		)
 		handle.group_output_done = False
 		self.handles.append( handle )
